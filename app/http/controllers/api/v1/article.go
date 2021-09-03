@@ -115,7 +115,7 @@ func AddArticle(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"code" : code,
-		"message" : errors.GetMsg(code),
+		"msg" : errors.GetMsg(code),
 		"data" : make(map[string]string),
 	})
 }
@@ -162,7 +162,7 @@ func EditArticle(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"code" : code,
-		"message" : errors.GetMsg(code),
+		"msg" : errors.GetMsg(code),
 		"data" : make(map[string]interface{}),
 	})
 }
@@ -185,7 +185,7 @@ func DeleteArticle(c *gin.Context) {
 	//返回结果
 	c.JSON(http.StatusOK, gin.H{
 		"code" : code,
-		"message" : errors.GetMsg(code),
+		"msg" : errors.GetMsg(code),
 		"data" : make(map[string]string),
 	})
 }

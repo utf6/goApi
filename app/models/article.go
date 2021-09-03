@@ -31,7 +31,7 @@ func GetArticleTotal(maps interface{}) (count int) {
 
 //获取所有文章
 func GetArticles(pageNum int, pageSize int, maps interface{}) (article []Article) {
-	db.Preload("Tag.name").Where(maps).Offset(pageNum).Limit(pageSize).Find(&article)
+	db.Preload("Tag.name").Where(maps).Offset(pageNum).Limit(pageSize).Order("id desc").Find(&article)
 	return
 }
 

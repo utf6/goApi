@@ -2,7 +2,9 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/utf6/goApi/app/http/controllers/api"
 	v1 "github.com/utf6/goApi/app/http/controllers/api/v1"
+	"github.com/utf6/goApi/app/http/middleware"
 	"github.com/utf6/goApi/pkg/config"
 )
 
@@ -12,7 +14,10 @@ func InitRoute() *gin.Engine {
 	r.Use(gin.Recovery())
 
 	gin.SetMode(config.RunMode)
+
+	r.POST("/auth/getToken", api.GetToken)
 	apiV1 := r.Group("/api/v1")
+	apiV1.Use(middleware.Auth())
 	{
 		//获取标签列表
 		apiV1.GET("/tags", v1.GetTags)
