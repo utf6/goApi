@@ -6,6 +6,7 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/utf6/goApi/pkg/config"
 	"log"
+	"time"
 )
 
 var db *gorm.DB
@@ -45,4 +46,17 @@ func init() {
 
 func CloseDB() {
 	defer db.Close()
+}
+
+func (tag *Tag) BeforeCreate(scope *gorm.Scope) error {
+	scope.SetColumn("CreatedAt", time.Now().Format("2006-01-02 15:04:05"))
+	scope.SetColumn("UpdatedAt", time.Now().Format("2006-01-02 15:04:05"))
+
+	return nil
+}
+
+func (tag *Tag) BeforeUpdate(scope *gorm.Scope) error {
+	scope.SetColumn("UpdatedAt", time.Now().Format("2006-01-02 15:04:05"))
+
+	return nil
 }

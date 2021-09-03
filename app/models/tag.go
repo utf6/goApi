@@ -1,17 +1,12 @@
 package models
 
-import (
-	"github.com/jinzhu/gorm"
-	"time"
-)
-
 type Tag struct {
 	Model
 
 	Name      string `json:"name"`
+	State     int    `json:"state"`
 	CreatedAt string `json:"created_at"`
 	UpdatedAt string `json:"updated_at"`
-	State     int    `json:"state"`
 }
 
 //获取标签
@@ -80,17 +75,4 @@ func DeleteTag(id int) bool {
 		return  false
 	}
 	return  true
-}
-
-func (tag *Tag) BeforeCreate(scope *gorm.Scope) error {
-	scope.SetColumn("CreatedAt", time.Now().Format("2006-01-02 15:04:05"))
-	scope.SetColumn("UpdatedAt", time.Now().Format("2006-01-02 15:04:05"))
-
-	return nil
-}
-
-func (tag *Tag) BeforeUpdate(scope *gorm.Scope) error {
-	scope.SetColumn("UpdatedAt", time.Now().Format("2006-01-02 15:04:05"))
-
-	return nil
 }
