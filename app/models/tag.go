@@ -37,6 +37,17 @@ func ExistTagByName(name string) bool {
 	return false
 }
 
+//通过id判断标签是否存在
+func ExistTagById(id int) bool {
+	var tag Tag
+	db.Where("id =  ?", id).First(&tag)
+
+	if tag.ID > 0 {
+		return true
+	}
+	return false
+}
+
 //新增标签
 func AddTag(name string) bool {
 	result := db.Create(&Tag{
@@ -48,6 +59,27 @@ func AddTag(name string) bool {
 		return false
 	}
 	return true
+}
+
+//编辑标签
+func EditTag(id int, data interface{}) bool {
+	result := db.Model(&Tag{}).Where("id = ?", id).Updates(data)
+
+	if result .Error != nil {
+		return  false
+	}
+
+	return true
+}
+
+//删除标签
+func DeleteTag(id int) bool {
+	result := db.Where("id = ?", id).Delete(&Tag{})
+
+	if result.Error != nil {
+		return  false
+	}
+	return  true
 }
 
 func (tag *Tag) BeforeCreate(scope *gorm.Scope) error {
