@@ -12,7 +12,12 @@ import (
 	"net/http"
 )
 
-//获取单个文章
+// @Tags 文章管理
+// @Summary 获取单个文章
+// @Param id path int false "文章id"
+// @Param token path string true "access_token"
+// @Success 200 {object} gin.H "{"code":200, "data":{}, "msg":"ok"}"
+// @Router /api/v1/articles/{id} [get]
 func GetArticle(c *gin.Context) {
 	id := com.StrTo(c.Param("id")).MustInt()
 
@@ -20,7 +25,7 @@ func GetArticle(c *gin.Context) {
 	valid.Min(id, 1, "id").Message("非法id")
 
 	code := errors.INVALID_PARAMS
-	var  data interface{}
+	var data interface{}
 	if !valid.HasErrors() {
 		if models.ExistArticleByID(id) {
 			data = models.GetArticle(id)
@@ -29,19 +34,25 @@ func GetArticle(c *gin.Context) {
 			code = errors.ERROR_NOT_EXIST_ARTICLE
 		}
 	} else {
-		for _, err:= range valid.Errors {
+		for _, err := range valid.Errors {
 			logger.Error(err.Key, err.Message)
 		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"code" : code,
-		"msg" : errors.GetMsg(code),
-		"data" : data,
+		"code": code,
+		"msg":  errors.GetMsg(code),
+		"data": data,
 	})
 }
 
-//获取多个文章
+// @Tags 文章管理
+// @Summary 获取多个文章
+// @Param tag_id query int false "标签id"
+// #Param state query int false "状态（0：删除，1：正常）"
+// @Param token path string true "access_token"
+// @Success 200 {object} gin.H "{"code":200, "data":{}, "msg":"ok"}"
+// @Router /api/v1/articles [get]
 func GetArticles(c *gin.Context) {
 	data := make(map[string]interface{})
 	maps := make(map[string]interface{})
@@ -70,13 +81,21 @@ func GetArticles(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"code" : code,
-		"msg" : errors.GetMsg(code),
-		"data" : data,
+		"code": code,
+		"msg":  errors.GetMsg(code),
+		"data": data,
 	})
 }
 
-//新增文章
+// @Tags 文章管理
+// @Summary 新增文章
+// @Param tag_id formData int true "标签id"
+// #Param title formData string true "文章标题"
+// #Param desc formData string true "文章描述"
+// #Param content formData string true "文章内容"
+// @Param token path string true "access_token"
+// @Success 200 {object} gin.H "{"code":200, "data":{}, "msg":"ok"}"
+// @Router /api/v1/articles [post]
 func AddArticle(c *gin.Context) {
 	tagId := com.StrTo(c.PostForm("tag_id")).MustInt()
 	title := c.PostForm("title")
@@ -101,7 +120,7 @@ func AddArticle(c *gin.Context) {
 			data["content"] = content
 			if models.AddArticle(data) {
 				code = errors.SUCCESS
-			} else  {
+			} else {
 				code = errors.ERROR
 			}
 		} else {
@@ -114,13 +133,22 @@ func AddArticle(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"code" : code,
-		"msg" : errors.GetMsg(code),
-		"data" : make(map[string]string),
+		"code": code,
+		"msg":  errors.GetMsg(code),
+		"data": make(map[string]string),
 	})
 }
 
-//修改文章
+// @Tags 文章管理
+// @Summary 修改文章
+// @Param id path int true "文章id"
+// @Param tag_id formData int true "标签id"
+// #Param title formData string true "文章标题"
+// #Param desc formData string true "文章描述"
+// #Param content formData string true "文章内容"
+// @Param token path string true "access_token"
+// @Success 200 {object} gin.H "{"code":200, "data":{}, "msg":"ok"}"
+// @Router /api/v1/articles/{id} [put]
 func EditArticle(c *gin.Context) {
 	//组合数据
 	id := com.StrTo(c.Param("id")).MustInt()
@@ -154,20 +182,25 @@ func EditArticle(c *gin.Context) {
 		} else {
 			code = errors.ERROR_NOT_EXIST_TAG
 		}
-	}  else {
+	} else {
 		for _, err := range valid.Errors {
 			logger.Error(err.Key, err.Message)
 		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"code" : code,
-		"msg" : errors.GetMsg(code),
-		"data" : make(map[string]interface{}),
+		"code": code,
+		"msg":  errors.GetMsg(code),
+		"data": make(map[string]interface{}),
 	})
 }
 
-//删除文章
+// @Tags 文章管理
+// @Summary 删除文章
+// @Param id path int true "文章id"
+// @Param token path string true "access_token"
+// @Success 200 {object} gin.H "{"code":200, "data":{}, "msg":"ok"}"
+// @Router /api/v1/articles/{id} [Delete]
 func DeleteArticle(c *gin.Context) {
 	id := com.StrTo(c.Param("id")).MustInt()
 
@@ -175,7 +208,7 @@ func DeleteArticle(c *gin.Context) {
 	if models.ExistArticleByID(id) {
 		if models.DeleteArticle(id) {
 			code = errors.SUCCESS
-		} else  {
+		} else {
 			code = errors.ERROR
 		}
 	} else {
@@ -184,8 +217,8 @@ func DeleteArticle(c *gin.Context) {
 
 	//返回结果
 	c.JSON(http.StatusOK, gin.H{
-		"code" : code,
-		"msg" : errors.GetMsg(code),
-		"data" : make(map[string]string),
+		"code": code,
+		"msg":  errors.GetMsg(code),
+		"data": make(map[string]string),
 	})
 }

@@ -18,10 +18,10 @@ func GenerateToken(username string) (map[string]interface{}, error) {
 	expireTime := time.Now().Add(3 * time.Hour).Unix()
 
 	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
-		Username:       username,
+		Username: username,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireTime,
-			Issuer: "goApi",
+			Issuer:    "goApi",
 		},
 	})
 	token, err := tokenClaims.SignedString(jwtSecret)

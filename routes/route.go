@@ -2,9 +2,12 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
 	"github.com/utf6/goApi/app/http/controllers/api"
 	v1 "github.com/utf6/goApi/app/http/controllers/api/v1"
 	"github.com/utf6/goApi/app/http/middleware"
+	_ "github.com/utf6/goApi/docs"
 	"github.com/utf6/goApi/pkg/config"
 )
 
@@ -16,6 +19,8 @@ func InitRoute() *gin.Engine {
 	gin.SetMode(config.RunMode)
 
 	r.POST("/auth/getToken", api.GetToken)
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	apiV1 := r.Group("/api/v1")
 	apiV1.Use(middleware.Auth())
 	{

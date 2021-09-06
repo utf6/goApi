@@ -35,7 +35,7 @@ func GetToken(c *gin.Context) {
 			data, err = util.GenerateToken(username)
 			if err != nil {
 				code = errors.ERROR_AUTH_TOKEN
-			} else  {
+			} else {
 				code = errors.SUCCESS
 			}
 		} else {
@@ -48,8 +48,8 @@ func GetToken(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"code" : code,
-		"msg" : errors.GetMsg(code),
-		"data" : data,
+		"code": code,
+		"msg":  errors.GetMsg(code),
+		"data": data,
 	})
 }

@@ -5,20 +5,20 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"github.com/utf6/goApi/pkg/config"
-	"log"
+	"github.com/utf6/goApi/pkg/logger"
 	"time"
 )
 
 var db *gorm.DB
 
 type Model struct {
-	ID        int `gorm:"primary_ke;auto" json:"id"`
+	ID int `gorm:"primary_ke;auto" json:"id"`
 }
 
 func init() {
 	sec, err := config.Cfg.GetSection("database")
 	if err != nil {
-		log.Fatal(2, "Fail to get section 'database': %v", err)
+		logger.Error("Fail to get section 'database': %v", err)
 	}
 
 	db, err = gorm.Open(
@@ -31,7 +31,7 @@ func init() {
 		))
 
 	if err != nil {
-		log.Println(err)
+		logger.Error(err)
 	}
 
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {

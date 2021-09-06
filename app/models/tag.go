@@ -46,8 +46,8 @@ func ExistTagById(id int) bool {
 //新增标签
 func AddTag(name string) bool {
 	result := db.Create(&Tag{
-		Name:      name,
-		State:     1,
+		Name:  name,
+		State: 1,
 	})
 
 	if result.Error != nil {
@@ -60,8 +60,8 @@ func AddTag(name string) bool {
 func EditTag(id int, data interface{}) bool {
 	result := db.Model(&Tag{}).Where("id = ?", id).Updates(data)
 
-	if result .Error != nil {
-		return  false
+	if result.Error != nil {
+		return false
 	}
 
 	return true
@@ -72,7 +72,7 @@ func DeleteTag(id int) bool {
 	result := db.Where("id = ?", id).Delete(&Tag{})
 
 	if result.Error != nil {
-		return  false
+		return false
 	}
-	return  true
+	return true
 }

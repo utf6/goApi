@@ -9,12 +9,12 @@ import (
 
 var (
 	LogSavePath = "runtime/logs/"
-	LogFileExt = "log"
-	TimeFormat = "20060102"
+	LogFileExt  = "log"
+	TimeFormat  = "20060102"
 )
 
 func getLogFilePath() string {
-	return  fmt.Sprintf("%s", LogSavePath)
+	return fmt.Sprintf("%s", LogSavePath)
 }
 
 func getLogFileFullPath() string {
@@ -24,27 +24,27 @@ func getLogFileFullPath() string {
 	return fmt.Sprintf("%s%s", prefixPath, suffixPath)
 }
 
-func openLogFile(filePath string) *os.File{
+func openLogFile(filePath string) *os.File {
 	_, err := os.Stat(filePath)
 	switch {
-		case os.IsNotExist(err):
-			Mkdir()
-		case os.IsPermission(err):
-			log.Fatalf("Permission : %v", err)
+	case os.IsNotExist(err):
+		Mkdir()
+	case os.IsPermission(err):
+		log.Fatalf("Permission : %v", err)
 
 	}
 
-	handle, err := os.OpenFile(filePath, os.O_APPEND | os.O_CREATE | os.O_WRONLY, 0644)
+	handle, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		 log.Fatalf("fail to openFile :%v", err)
+		log.Fatalf("fail to openFile :%v", err)
 	}
 
 	return handle
 }
 
-func Mkdir()  {
+func Mkdir() {
 	dir, _ := os.Getwd()
-	err := os.MkdirAll(dir + "/" + getLogFilePath(), os.ModePerm)
+	err := os.MkdirAll(dir+"/"+getLogFilePath(), os.ModePerm)
 
 	if err != nil {
 		panic(err)

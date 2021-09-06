@@ -13,11 +13,11 @@ type Level int
 var (
 	F *os.File
 
-	DefaultPrefix = ""
+	DefaultPrefix      = ""
 	DefaultCallerDepth = 2
 
-	logger * log.Logger
-	logPrefix = ""
+	logger     *log.Logger
+	logPrefix  = ""
 	levelFlags = []string{"DEBUG", "INFO", "WARN", "ERROR", "FATAL"}
 )
 
@@ -29,24 +29,24 @@ const (
 	FATAL
 )
 
-func init()  {
+func init() {
 	filePath := getLogFileFullPath()
 	F = openLogFile(filePath)
 
 	logger = log.New(F, DefaultPrefix, log.LstdFlags)
 }
 
-func Debug(v ...interface{})  {
+func Debug(v ...interface{}) {
 	SetPrefix(DEBUG)
 	logger.Println(v)
 }
 
-func Info(v ...interface{})  {
+func Info(v ...interface{}) {
 	SetPrefix(INFO)
 	logger.Println(v)
 }
 
-func Warn(v ...interface{})  {
+func Warn(v ...interface{}) {
 	SetPrefix(WARNING)
 	logger.Panicln(v)
 }
@@ -56,12 +56,12 @@ func Error(v ...interface{}) {
 	logger.Println(v)
 }
 
-func Fatal(v ...interface{})  {
+func Fatal(v ...interface{}) {
 	SetPrefix(FATAL)
 	logger.Fatalln(v)
 }
 
-func SetPrefix(level Level)  {
+func SetPrefix(level Level) {
 	_, file, line, ok := runtime.Caller(DefaultCallerDepth)
 	if ok {
 		logPrefix = fmt.Sprintf("[%s][%s:%d]", levelFlags[level], filepath.Base(file), line)

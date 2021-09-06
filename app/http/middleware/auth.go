@@ -29,13 +29,13 @@ func Auth() gin.HandlerFunc {
 		}
 
 		if code != errors.SUCCESS {
-			 c.JSON(http.StatusUnauthorized, gin.H{
-			 	"code" : code,
-			 	"msg" : errors.GetMsg(code),
-			 	"data" : data,
-			 })
-			 c.Abort()
-			 return
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code": code,
+				"msg":  errors.GetMsg(code),
+				"data": data,
+			})
+			c.Abort()
+			return
 		}
 		c.Next()
 	}
