@@ -1,0 +1,10 @@
+FROM scratch
+
+ENV GOPROXY https://goproxy.cn,direct
+WORKDIR $GOPATH/src/github.com/utf6/goApi
+
+COPY . $GOPATH/src/github.com/utf6/goApi
+RUN go build .
+
+EXPOSE 8000
+ENTRYPOINT ["./goApi"]

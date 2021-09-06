@@ -5,8 +5,6 @@ type Tag struct {
 
 	Name      string `json:"name"`
 	State     int    `json:"state"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
 }
 
 //获取标签
