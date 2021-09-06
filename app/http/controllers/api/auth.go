@@ -5,8 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/utf6/goApi/app/models"
 	errors "github.com/utf6/goApi/pkg/error"
+	"github.com/utf6/goApi/pkg/logger"
 	"github.com/utf6/goApi/pkg/util"
-	"log"
 	"net/http"
 )
 
@@ -43,7 +43,7 @@ func GetToken(c *gin.Context) {
 		}
 	} else {
 		for _, err := range valid.Errors {
-			log.Println(err.Key, err.Message)
+			logger.Info(err.Key, err.Message)
 		}
 	}
 

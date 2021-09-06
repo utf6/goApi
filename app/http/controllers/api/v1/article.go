@@ -7,8 +7,8 @@ import (
 	"github.com/utf6/goApi/app/models"
 	"github.com/utf6/goApi/pkg/config"
 	errors "github.com/utf6/goApi/pkg/error"
+	"github.com/utf6/goApi/pkg/logger"
 	"github.com/utf6/goApi/pkg/util"
-	"log"
 	"net/http"
 )
 
@@ -30,7 +30,7 @@ func GetArticle(c *gin.Context) {
 		}
 	} else {
 		for _, err:= range valid.Errors {
-			log.Printf("err.key: %s, err.message: %s", err.Key, err.Message)
+			logger.Error(err.Key, err.Message)
 		}
 	}
 
@@ -65,7 +65,7 @@ func GetArticles(c *gin.Context) {
 		data["total"] = models.GetArticleTotal(maps)
 	} else {
 		for _, err := range valid.Errors {
-			log.Printf("err.key: %s, err.message: %s", err.Key, err.Message)
+			logger.Error(err.Key, err.Message)
 		}
 	}
 
@@ -109,7 +109,7 @@ func AddArticle(c *gin.Context) {
 		}
 	} else {
 		for _, err := range valid.Errors {
-			log.Printf("err.key: %s, err.message: %s", err.Key, err.Message)
+			logger.Error(err.Key, err.Message)
 		}
 	}
 
@@ -156,7 +156,7 @@ func EditArticle(c *gin.Context) {
 		}
 	}  else {
 		for _, err := range valid.Errors {
-			log.Printf("err.key: %s, err.message: %s", err.Key, err.Message)
+			logger.Error(err.Key, err.Message)
 		}
 	}
 

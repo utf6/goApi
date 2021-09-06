@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/go-ini/ini"
-	"log"
+	"github.com/utf6/goApi/pkg/logger"
 	"time"
 )
 
@@ -21,7 +21,7 @@ func init() {
 	var err error
 	Cfg, err = ini.Load("app.ini")
 	if err != nil {
-		log.Fatalf("Fail to parse 'conf/app.ini': %v", err)
+		logger.Error("Fail to parse 'conf/app.ini': %v", err)
 	}
 
 	//加载运行模式
@@ -30,7 +30,7 @@ func init() {
 	//加载服务配置
 	ser, err := Cfg.GetSection("server")
 	if err != nil {
-		log.Fatalf("Fail to get section 'server': %v", err)
+		logger.Error("Fail to get section 'server': %v", err)
 	}
 	HttpPort = ser.Key("HTTP_PORT").MustInt(8000)
 	ReadTimeOut = time.Duration(ser.Key("READ_TIMEOUT").MustInt(60)) * time.Second
@@ -39,7 +39,7 @@ func init() {
 	//加载系统配置
 	app, err := Cfg.GetSection("app")
 	if err != nil {
-		log.Fatalf("Fail to get section 'app': %v", err)
+		logger.Error("Fail to get section 'app': %v", err)
 	}
 	JwtSecret = app.Key("JWT_SECRET").MustString("saf2sa23@!##")
 	PageSize = app.Key("PAGE_SIZE").MustInt(10)
