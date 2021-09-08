@@ -49,7 +49,7 @@ func GetArticle(c *gin.Context) {
 // @Tags 文章管理
 // @Summary 获取多个文章
 // @Param tag_id query int false "标签id"
-// #Param state query int false "状态（0：删除，1：正常）"
+// @Param state query int false "状态（0：删除，1：正常）"
 // @Param token path string true "access_token"
 // @Success 200 {object} gin.H "{"code":200, "data":{}, "msg":"ok"}"
 // @Router /api/v1/articles [get]
@@ -72,7 +72,7 @@ func GetArticles(c *gin.Context) {
 	if !valid.HasErrors() {
 		code = errors.SUCCESS
 
-		data["lists"] = models.GetArticles(util.GetPage(c), config.PageSize, maps)
+		data["lists"] = models.GetArticles(util.GetPage(c), config.Apps.PageSize, maps)
 		data["total"] = models.GetArticleTotal(maps)
 	} else {
 		for _, err := range valid.Errors {
@@ -90,9 +90,9 @@ func GetArticles(c *gin.Context) {
 // @Tags 文章管理
 // @Summary 新增文章
 // @Param tag_id formData int true "标签id"
-// #Param title formData string true "文章标题"
-// #Param desc formData string true "文章描述"
-// #Param content formData string true "文章内容"
+// @Param title formData string true "文章标题"
+// @Param desc formData string true "文章描述"
+// @Param content formData string true "文章内容"
 // @Param token path string true "access_token"
 // @Success 200 {object} gin.H "{"code":200, "data":{}, "msg":"ok"}"
 // @Router /api/v1/articles [post]
@@ -143,9 +143,9 @@ func AddArticle(c *gin.Context) {
 // @Summary 修改文章
 // @Param id path int true "文章id"
 // @Param tag_id formData int true "标签id"
-// #Param title formData string true "文章标题"
-// #Param desc formData string true "文章描述"
-// #Param content formData string true "文章内容"
+// @Param title formData string true "文章标题"
+// @Param desc formData string true "文章描述"
+// @Param content formData string true "文章内容"
 // @Param token path string true "access_token"
 // @Success 200 {object} gin.H "{"code":200, "data":{}, "msg":"ok"}"
 // @Router /api/v1/articles/{id} [put]

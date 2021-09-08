@@ -6,41 +6,65 @@ import (
 	"time"
 )
 
-var (
-	Cfg          *ini.File
-	RunMode      string
-	HttpPort     int
-	ReadTimeOut  time.Duration
-	WriteTimeOut time.Duration
-
-	PageSize  int
+type App struct {
 	JwtSecret string
-)
+	PageSize int
+	RuntimeRootPath string
 
-func init() {
-	var err error
-	Cfg, err = ini.Load("app.ini")
+	ImagePrefixUrl string
+	ImageSavePath string
+	ImageMaxSize int
+	ImageAllows []string
+
+	LogSavePath string
+	LogSaveName string
+	LogFileExt string
+	TimeFormat string
+}
+
+var Apps = &App{}
+
+type Server struct {
+	RunMode string
+	HttpPort int
+	ReadTimeout time.Duration
+	WriteTimeout time.Duration
+}
+
+var Servers = &Server{}
+
+type Database struct {
+	Type string
+	User string
+	Password string
+	Host string
+	Name string
+	TablePrefix string
+}
+
+var Databases = &Database{}
+
+func Setup() {
+	Cfg, err := ini.Load("app.ini")
 	if err != nil {
 		logger.Error("Fail to parse 'conf/app.ini': %v", err)
 	}
 
-	//加载运行模式
-	RunMode = Cfg.Section("").Key("RUN_MODE").MustString("debug")
+	//加载系统配置
+	err = Cfg.Section("app").MapTo(Apps)
+	if err != nil {
+		logger.Error("Cfg.MapTo Apps err: %v", err)
+	}
 
 	//加载服务配置
-	ser, err := Cfg.GetSection("server")
+	err = Cfg.Section("server").MapTo(Servers)
 	if err != nil {
-		logger.Error("Fail to get section 'server': %v", err)
+		logger.Error("Cfg.MapTo Servers err: %v", err)
 	}
-	HttpPort = ser.Key("HTTP_PORT").MustInt(8000)
-	ReadTimeOut = time.Duration(ser.Key("READ_TIMEOUT").MustInt(60)) * time.Second
-	WriteTimeOut = time.Duration(ser.Key("WRITE_TIMEOUT").MustInt(60)) * time.Second
 
-	//加载系统配置
-	app, err := Cfg.GetSection("app")
+	//加载数据库配置
+	err = Cfg.Section("database").MapTo(Databases)
 	if err != nil {
-		logger.Error("Fail to get section 'app': %v", err)
+		logger.Error("Cfg.MapTo Databasess err: %v", err)
 	}
-	JwtSecret = app.Key("JWT_SECRET").MustString("saf2sa23@!##")
-	PageSize = app.Key("PAGE_SIZE").MustInt(10)
 }

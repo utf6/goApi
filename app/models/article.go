@@ -78,3 +78,11 @@ func DeleteArticle(id int) bool {
 	}
 	return true
 }
+
+func CleanArticle() bool {
+	result := db.Unscoped().Where("state = ?", -1).Delete(&Article{})
+	if result.Error != nil {
+		return false
+	}
+	return true
+}

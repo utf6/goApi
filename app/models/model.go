@@ -18,19 +18,14 @@ type Model struct {
 	State int `json:"state"`
 }
 
-func init() {
-	sec, err := config.Cfg.GetSection("database")
-	if err != nil {
-		logger.Error("Fail to get section 'database': %v", err)
-	}
-
-	db, err = gorm.Open(
-		sec.Key("TYPE").String(),
+func Setup() {
+	db, err := gorm.Open(
+		config.Databases.Type,
 		fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local",
-			sec.Key("USER").String(),
-			sec.Key("PASSWORD").String(),
-			sec.Key("HOST").String(),
-			sec.Key("NAME").String(),
+			config.Databases.User,
+			config.Databases.Password,
+			config.Databases.Host,
+			config.Databases.Name,
 		))
 
 	if err != nil {
@@ -38,7 +33,7 @@ func init() {
 	}
 
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
-		return sec.Key("TABLE_PREFIX").String() + defaultTableName
+		return config.Databases.TablePrefix + defaultTableName
 	}
 
 	db.SingularTable(true)

@@ -15,6 +15,12 @@ type auth struct {
 	Password string `valid:"Required; MaxSize(50)"`
 }
 
+// @Tags 权限管理
+// @Summary 获取token
+// @Param username formData string true "用户名"
+// @Param password formData string true "密码"
+// @Success 200 {object} gin.H "{"code":200, "data":{}, "msg":"ok"}"
+// @Router /api/auth/getToken [post]
 func GetToken(c *gin.Context) {
 	username := c.PostForm("username")
 	password := c.PostForm("password")

@@ -2,18 +2,24 @@ package main
 
 import (
 	"fmt"
+	"github.com/utf6/goApi/app/models"
 	"github.com/utf6/goApi/pkg/config"
+	"github.com/utf6/goApi/pkg/logger"
 	"github.com/utf6/goApi/routes"
 	"net/http"
 )
 
 func main() {
+	config.Setup()
+	models.Setup()
+	logger.Setup()
+
 	r := routes.InitRoute()
 	s := &http.Server{
-		Addr:           fmt.Sprintf(":%d", config.HttpPort),
+		Addr:           fmt.Sprintf(":%d", config.Servers.HttpPort),
 		Handler:        r,
-		ReadTimeout:    config.ReadTimeOut,
-		WriteTimeout:   config.WriteTimeOut,
+		ReadTimeout:    config.Servers.ReadTimeout,
+		WriteTimeout:   config.Servers.WriteTimeout,
 		MaxHeaderBytes: 1 << 20,
 	}
 	s.ListenAndServe()

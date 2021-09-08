@@ -74,3 +74,11 @@ func DeleteTag(id int) bool {
 	}
 	return true
 }
+
+func CleanTag() bool {
+	result := db.Unscoped().Where("state = ?", -1).Delete(&Tag{})
+	if result != nil {
+		return  false
+	}
+	return true
+}
