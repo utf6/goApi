@@ -2,34 +2,31 @@ package models
 
 import (
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/utf6/goApi/pkg/config"
-	"github.com/utf6/goApi/pkg/logger"
+	"log"
 	"time"
 )
 
 var db *gorm.DB
 
 type Model struct {
-	ID int `gorm:"primary_ke;auto" json:"id"`
+	ID        int       `gorm:"primary_key" json:"id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	State int `json:"state"`
 }
 
 func Setup() {
-	db, err := gorm.Open(
-		config.Databases.Type,
-		fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local",
-			config.Databases.User,
-			config.Databases.Password,
-			config.Databases.Host,
-			config.Databases.Name,
-		))
+	var err error
+	db, err = gorm.Open(config.Databases.Type, fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local",
+		config.Databases.User,
+		config.Databases.Password,
+		config.Databases.Host,
+		config.Databases.Name))
 
 	if err != nil {
-		logger.Error(err)
+		log.Printf("Fail to connection: %v", err)
 	}
 
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
@@ -52,7 +49,7 @@ func CloseDB() {
 }
 
 //增加数据回调
-func updateTimeStampForCreateCallback(scope *gorm.Scope)  {
+func updateTimeStampForCreateCallback(scope *gorm.Scope) {
 	if !scope.HasError() {
 		nowTime := time.Now()
 

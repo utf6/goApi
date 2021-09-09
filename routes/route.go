@@ -16,7 +16,7 @@ func InitRoute() *gin.Engine {
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 
-	gin.SetMode(config.RunMode)
+	gin.SetMode(config.Servers.RunMode)
 
 	r.POST("/auth/getToken", api.GetToken)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

@@ -19,12 +19,11 @@ import (
 // @Success 200 {object} gin.H "{"code":200, "data":{}, "msg":"ok"}"
 // @Router /api/v1/tags [get]
 func GetTags(c *gin.Context) {
-	name := c.Query("name")
 	//state := c.DefaultQuery("state", "1")
-
 	maps := make(map[string]interface{})
 	data := make(map[string]interface{})
 
+	name := c.Query("name")
 	if name != "" {
 		maps["name"] = name
 	}

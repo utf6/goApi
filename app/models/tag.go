@@ -3,8 +3,8 @@ package models
 type Tag struct {
 	Model
 
-	Name      string `json:"name"`
-	State     int    `json:"state"`
+	Name  string `json:"name"`
+	State int    `json:"state"`
 }
 
 //获取标签
@@ -78,7 +78,7 @@ func DeleteTag(id int) bool {
 func CleanTag() bool {
 	result := db.Unscoped().Where("state = ?", -1).Delete(&Tag{})
 	if result != nil {
-		return  false
+		return false
 	}
 	return true
 }

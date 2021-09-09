@@ -1,6 +1,8 @@
 package models
 
-import "github.com/utf6/goApi/app"
+import (
+	"github.com/utf6/goApi/app"
+)
 
 type Auth struct {
 	ID       int    `gorm:"primary_key" json:"id"`
@@ -11,6 +13,7 @@ type Auth struct {
 func CheckAuth(username, password string) bool {
 	var auth Auth
 	db.Select("id,password").Where("username = ?", username).First(&auth)
+	//db.Select("id,password").Where(Auth{Username: username}).First(&auth)
 
 	if auth.ID < 0 && !app.ValidatePasswords(auth.Password, password) {
 		return false

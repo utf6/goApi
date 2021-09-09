@@ -6,12 +6,37 @@ info:
   contact: {}
   license: {}
 paths:
+  /api/auth/getToken:
+    post:
+      parameters:
+      - description: 用户名
+        in: formData
+        name: username
+        required: true
+        type: string
+      - description: 密码
+        in: formData
+        name: password
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{"code":200, "data":{}, "msg":"ok"}'
+          schema:
+            $ref: '#/definitions/gin.H'
+      summary: 获取token
+      tags:
+      - 权限管理
   /api/v1/articles:
     get:
       parameters:
       - description: 标签id
         in: query
         name: tag_id
+        type: integer
+      - description: 状态（0：删除，1：正常）
+        in: query
+        name: state
         type: integer
       - description: access_token
         in: path
@@ -33,6 +58,21 @@ paths:
         name: tag_id
         required: true
         type: integer
+      - description: 文章标题
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: 文章描述
+        in: formData
+        name: desc
+        required: true
+        type: string
+      - description: 文章内容
+        in: formData
+        name: content
+        required: true
+        type: string
       - description: access_token
         in: path
         name: token
@@ -98,6 +138,21 @@ paths:
         name: tag_id
         required: true
         type: integer
+      - description: 文章标题
+        in: formData
+        name: title
+        required: true
+        type: string
+      - description: 文章描述
+        in: formData
+        name: desc
+        required: true
+        type: string
+      - description: 文章内容
+        in: formData
+        name: content
+        required: true
+        type: string
       - description: access_token
         in: path
         name: token

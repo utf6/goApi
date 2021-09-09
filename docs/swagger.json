@@ -5,6 +5,38 @@
         "license": {}
     },
     "paths": {
+        "/api/auth/getToken": {
+            "post": {
+                "tags": [
+                    "权限管理"
+                ],
+                "summary": "获取token",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用户名",
+                        "name": "username",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "密码",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":200, \"data\":{}, \"msg\":\"ok\"}",
+                        "schema": {
+                            "$ref": "#/definitions/gin.H"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/articles": {
             "get": {
                 "tags": [
@@ -16,6 +48,12 @@
                         "type": "integer",
                         "description": "标签id",
                         "name": "tag_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态（0：删除，1：正常）",
+                        "name": "state",
                         "in": "query"
                     },
                     {
@@ -45,6 +83,27 @@
                         "type": "integer",
                         "description": "标签id",
                         "name": "tag_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "文章标题",
+                        "name": "title",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "文章描述",
+                        "name": "desc",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "文章内容",
+                        "name": "content",
                         "in": "formData",
                         "required": true
                     },
@@ -113,6 +172,27 @@
                         "type": "integer",
                         "description": "标签id",
                         "name": "tag_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "文章标题",
+                        "name": "title",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "文章描述",
+                        "name": "desc",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "文章内容",
+                        "name": "content",
                         "in": "formData",
                         "required": true
                     },
