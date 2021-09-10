@@ -3,6 +3,8 @@ package app
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"github.com/gin-gonic/gin"
+	errors "github.com/utf6/goApi/pkg/error"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -30,4 +32,13 @@ func Md5(value string) string {
 	str.Write([]byte(value))
 
 	return hex.EncodeToString(str.Sum(nil))
+}
+
+//返回结果
+func Response(httpCode, code int, data interface{}, C *gin.Context) {
+	C.JSON(httpCode, gin.H{
+		"code" : code,
+		"msg" : errors.GetMsg(code),
+		"data": data,
+	})
 }

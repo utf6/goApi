@@ -2,6 +2,7 @@ package logger
 
 import (
 	"fmt"
+	"github.com/astaxie/beego/validation"
 	"log"
 	"os"
 	"path/filepath"
@@ -57,6 +58,12 @@ func Warn(v ...interface{}) {
 func Error(v ...interface{}) {
 	SetPrefix(ERROR)
 	logger.Println(v)
+}
+
+func Errors(errors []*validation.Error)  {
+	for _, err := range errors {
+		Error(err.Key, err.Message)
+	}
 }
 
 func Fatal(v ...interface{}) {

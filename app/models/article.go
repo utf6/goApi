@@ -8,6 +8,7 @@ type Article struct {
 
 	Title   string `json:"title"`
 	Desc    string `json:"desc"`
+	Thumb string `json:"thumb"`
 	Content string `json:"content"`
 	State   int    `json:"state"`
 }

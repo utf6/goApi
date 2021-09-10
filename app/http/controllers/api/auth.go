@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/astaxie/beego/validation"
 	"github.com/gin-gonic/gin"
+	"github.com/utf6/goApi/app"
 	"github.com/utf6/goApi/app/models"
 	errors "github.com/utf6/goApi/pkg/error"
 	"github.com/utf6/goApi/pkg/files"
@@ -32,33 +33,29 @@ func GetToken(c *gin.Context) {
 		Password: password,
 	})
 
-	data := make(map[string]interface{})
-	code := errors.INVALID_PARAMS
-
-	if ok {
-		isExist := models.CheckAuth(username, password)
-		if isExist {
-			var err error
-			data, err = util.GenerateToken(username)
-			if err != nil {
-				code = errors.ERROR_AUTH_TOKEN
-			} else {
-				code = errors.SUCCESS
-			}
-		} else {
-			code = errors.ERROR_AUTH
-		}
-	} else {
-		for _, err := range valid.Errors {
-			logger.Info(err.Key, err.Message)
-		}
+	//验证数据
+	if !ok {
+		logger.Errors(valid.Errors)
+		app.Response(http.StatusBadRequest, errors.INVALID_PARAMS, nil, c)
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  errors.GetMsg(code),
-		"data": data,
-	})
+	//验证用户
+	isExist := models.CheckAuth(username, password)
+	if !isExist {
+		app.Response(http.StatusBadRequest, errors.INVALID_PARAMS, nil, c)
+		return
+	}
+
+	var err error
+	data := make(map[string]interface{})
+	data, err = util.GenerateToken(username)
+	if err != nil {
+		app.Response(http.StatusBadRequest, errors.ERROR_AUTH_TOKEN, nil, c)
+		return
+	}
+
+	app.Response(http.StatusOK, errors.SUCCESS, data, c)
 }
 
 //@Tags 文件上传
@@ -68,36 +65,37 @@ func GetToken(c *gin.Context) {
 //@Success 200 {object} gin.H "{"code":200, "data":{}, "msg":"ok"}"
 //@Router /api/auth/getToken [post]
 func Uploads(c *gin.Context)  {
-	code := errors.SUCCESS
-	data := make(map[string]string)
-
 	file, image, err := c.Request.FormFile("files")
 	if err != nil || image == nil {
-		code = errors.INVALID_PARAMS
-	} else {
-		imageName := files.GetImageName(image.Filename)
-		savePath := files.GetImagePath()
-
-		src := "public/" + savePath + imageName
-		if !files.CheckImageExt(imageName) || ! files.CheckImageSize(file) {
-			code = errors.ERROR_UPLOAD_CHECK_IMAGE_FORMAT
-		} else {
-			err := files.CheckImage("public/" + savePath)
-			if err != nil {
-				 logger.Warn(err)
-				 code = errors.ERROR_UPLOAD_CHECK_IMAGE_FAIL
-			} else if err := c.SaveUploadedFile(image, src); err != nil {
-				logger.Warn(err)
-				code = errors.ERROR_UPLOAD_SAVE_IMAGE_FAIL
-			} else {
-				data["file_path"] = files.GetImageFullUrl(imageName)
-				data["file_name"] = imageName
-			}
-		}
+		app.Response(http.StatusBadRequest, errors.INVALID_PARAMS, nil, c)
+		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code" : code,
-		"msg" : errors.GetMsg(code),
-		"data" : data,
-	})
+
+	imageName := files.GetImageName(image.Filename)
+	savePath := files.GetImagePath()
+	src := "public/" + savePath + imageName
+
+	if !files.CheckImageExt(imageName) || ! files.CheckImageSize(file) {
+		app.Response(http.StatusBadRequest, errors.ERROR_UPLOAD_CHECK_IMAGE_FORMAT, nil, c)
+		return
+	}
+
+	err = files.CheckImage("public/" + savePath)
+	if err != nil {
+		logger.Warn(err)
+		app.Response(http.StatusBadRequest, errors.ERROR_UPLOAD_CHECK_IMAGE_FAIL, nil, c)
+		return
+	}
+
+	err = c.SaveUploadedFile(image, src);
+	if  err != nil {
+		logger.Warn(err)
+		app.Response(http.StatusBadRequest, errors.ERROR_UPLOAD_SAVE_IMAGE_FAIL, nil, c)
+		return
+	}
+
+	data := make(map[string]string)
+	data["file_path"] = files.GetImageFullUrl(imageName)
+	data["file_name"] = imageName
+	app.Response(http.StatusOK, errors.SUCCESS, data, c)
 }

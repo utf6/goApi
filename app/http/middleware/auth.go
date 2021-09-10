@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/utf6/goApi/app"
 	errors "github.com/utf6/goApi/pkg/error"
 	"github.com/utf6/goApi/pkg/util"
 	"net/http"
@@ -29,11 +30,7 @@ func Auth() gin.HandlerFunc {
 		}
 
 		if code != errors.SUCCESS {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code": code,
-				"msg":  errors.GetMsg(code),
-				"data": data,
-			})
+			app.Response(http.StatusUnauthorized, code, data, c)
 			c.Abort()
 			return
 		}

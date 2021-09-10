@@ -4,9 +4,11 @@ import (
 	"github.com/astaxie/beego/validation"
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
+	"github.com/utf6/goApi/app"
 	"github.com/utf6/goApi/app/models"
 	"github.com/utf6/goApi/pkg/config"
 	errors "github.com/utf6/goApi/pkg/error"
+	"github.com/utf6/goApi/pkg/logger"
 	"github.com/utf6/goApi/pkg/util"
 	"net/http"
 )
@@ -34,15 +36,10 @@ func GetTags(c *gin.Context) {
 		maps["state"] = state
 	}
 
-	code := errors.SUCCESS
+	//获取数据
 	data["list"] = models.GetTags(util.GetPage(c), config.Apps.PageSize, maps)
 	data["total"] = models.GetTagTotal(maps)
-
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  errors.GetMsg(code),
-		"data": data,
-	})
+	app.Response(http.StatusOK, errors.SUCCESS, data, c)
 }
 
 // @Tags 标签管理
@@ -58,28 +55,27 @@ func AddTag(c *gin.Context) {
 	valid.Required(name, "name").Message("名称不能为空！")
 	valid.MaxSize(name, 100, "name").Message("名称最多100字符")
 
-	code := errors.INVALID_PARAMS
-	if !valid.HasErrors() {
-		//判断标签是否存在
-		if !models.ExistTagByName(name) {
-			//判断是否添加成功
-			if models.AddTag(name) {
-				code = errors.SUCCESS
-			} else {
-				code = errors.ERROR
-			}
-		} else {
-			code = errors.ERROR_EXIST_TAG
-		}
+	//数据验证错误
+	if valid.HasErrors() {
+		logger.Errors(valid.Errors)
+		app.Response(http.StatusBadRequest, errors.INVALID_PARAMS, nil, c)
+		return
 	}
 
-	//返回结果
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  errors.GetMsg(code),
-		"data": make(map[string]string),
-	})
+	//判断标签是否存在
+	if !models.ExistTagByName(name) {
+		app.Response(http.StatusBadRequest, errors.ERROR_EXIST_TAG, nil, c)
+		return
+	}
 
+	//判断是否添加成功
+	if models.AddTag(name) {
+		//返回结果
+		app.Response(http.StatusOK, errors.SUCCESS, nil, c)
+		return
+	}
+
+	app.Response(http.StatusInternalServerError, errors.ERROR, nil, c)
 }
 
 // @Tags 标签管理
@@ -98,27 +94,28 @@ func EditTag(c *gin.Context) {
 	valid.Required(name, "name").Message("名称不能为空")
 	valid.MaxSize(name, 100, "name").Message("名称最多100字符")
 
-	code := errors.INVALID_PARAMS
-	if !valid.HasErrors() {
-		if models.ExistTagById(id) {
-			data := make(map[string]interface{})
-			data["name"] = name
-
-			if models.EditTag(id, data) {
-				code = errors.SUCCESS
-			} else {
-				code = errors.ERROR
-			}
-		} else {
-			code = errors.ERROR_NOT_EXIST_TAG
-		}
+	//数据验证错误
+	if valid.HasErrors() {
+		logger.Errors(valid.Errors)
+		app.Response(http.StatusBadRequest, errors.INVALID_PARAMS, nil, c)
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  errors.GetMsg(code),
-		"data": make(map[string]string),
-	})
+	//判断标签是否存在
+	if !models.ExistTagById(id) {
+		app.Response(http.StatusBadRequest, errors.ERROR_NOT_EXIST_TAG, nil, c)
+		return
+	}
+
+	//组合数据
+	data := make(map[string]interface{})
+	data["name"] = name
+	if models.EditTag(id, data) {
+		app.Response(http.StatusOK, errors.SUCCESS, nil, c)
+		return
+	}
+
+	app.Response(http.StatusInternalServerError, errors.ERROR, nil, c)
 }
 
 // @Tags 标签管理
@@ -133,22 +130,22 @@ func DeleteTag(c *gin.Context) {
 	valid := validation.Validation{}
 	valid.Min(id, 1, "id").Message("id 必须大于0")
 
-	code := errors.INVALID_PARAMS
-	if !valid.HasErrors() {
-		if models.ExistTagById(id) {
-			if models.DeleteTag(id) {
-				code = errors.SUCCESS
-			} else {
-				code = errors.ERROR
-			}
-		} else {
-			code = errors.ERROR_NOT_EXIST_TAG
-		}
+	if valid.HasErrors() {
+		logger.Errors(valid.Errors)
+		app.Response(http.StatusBadRequest, errors.INVALID_PARAMS, nil, c)
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"code": code,
-		"msg":  errors.GetMsg(code),
-		"data": make(map[string]string),
-	})
+	//判断标签是否存在
+	if !models.ExistTagById(id) {
+		app.Response(http.StatusBadRequest, errors.ERROR_NOT_EXIST_TAG, nil, c)
+		return
+	}
+
+	if models.DeleteTag(id) {
+		app.Response(http.StatusOK, errors.SUCCESS, nil, c)
+		return
+	}
+
+	app.Response(http.StatusInternalServerError, errors.ERROR, nil, c)
 }
