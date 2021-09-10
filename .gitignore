@@ -13,3 +13,4 @@
 *.out
 runtime
 go.sum
+public/uploads

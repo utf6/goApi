@@ -9,6 +9,8 @@ import (
 	"github.com/utf6/goApi/app/http/middleware"
 	_ "github.com/utf6/goApi/docs"
 	"github.com/utf6/goApi/pkg/config"
+	"github.com/utf6/goApi/pkg/files"
+	"net/http"
 )
 
 func InitRoute() *gin.Engine {
@@ -19,6 +21,9 @@ func InitRoute() *gin.Engine {
 	gin.SetMode(config.Servers.RunMode)
 
 	r.POST("/auth/getToken", api.GetToken)
+	r.POST("/auth/uploads", api.Uploads)
+	r.StaticFS("/uploads/images", http.Dir(config.Apps.RootPath + files.GetImagePath()))
+
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	apiV1 := r.Group("/api/v1")
