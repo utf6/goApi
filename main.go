@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/utf6/goApi/app/models"
+	"github.com/utf6/goApi/pkg/cache"
 	"github.com/utf6/goApi/pkg/config"
 	"github.com/utf6/goApi/pkg/logger"
 	"github.com/utf6/goApi/routes"
@@ -15,6 +16,7 @@ func init() {
 	config.Setup()
 	models.Setup()
 	logger.Setup()
+	cache.Setup()
 }
 
 func main() {

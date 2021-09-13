@@ -44,6 +44,17 @@ type Database struct {
 
 var Databases = &Database{}
 
+
+type GRedis struct {
+	Host        string
+	MaxIdle        int
+	Password    string
+	MaxActive        int
+	IdleTimeout        time.Duration
+}
+
+var Redis = &GRedis{}
+
 func Setup() {
 	Cfg, err := ini.Load("app.ini")
 	if err != nil {
@@ -66,5 +77,11 @@ func Setup() {
 	err = Cfg.Section("server").MapTo(Servers)
 	if err != nil {
 		log.Printf("Cfg.MapTo Servers err: %v", err)
+	}
+
+	//加载redis配置
+	err = Cfg.Section("redis").MapTo(Redis)
+	if err != nil {
+		log.Printf("Cfg.MapTo Redis err: %v", err)
 	}
 }
