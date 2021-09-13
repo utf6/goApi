@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	errors "github.com/utf6/goApi/pkg/error"
 	"golang.org/x/crypto/bcrypt"
+	"strconv"
+	"strings"
 )
 
 // hash 加密
@@ -41,4 +43,14 @@ func Response(httpCode, code int, data interface{}, C *gin.Context) {
 		"msg" : errors.GetMsg(code),
 		"data": data,
 	})
+}
+
+func GetCacheKeys(pre string, data []int) string {
+	keys := []string{pre, "list",}
+	for val := range data {
+		if val > 0 {
+			keys = append(keys, strconv.Itoa(val))
+		}
+	}
+	return strings.Join(keys, "_")
 }
