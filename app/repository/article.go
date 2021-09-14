@@ -2,11 +2,11 @@ package repository
 
 import (
 	"encoding/json"
-	"github.com/utf6/goApi/app"
 	"github.com/utf6/goApi/app/models"
 	"github.com/utf6/goApi/pkg/cache"
 	"github.com/utf6/goApi/pkg/logger"
 	"strconv"
+	"strings"
 )
 
 type Article struct {
@@ -86,13 +86,7 @@ func (a *Article) GetAll() ([]*models.Article, error) {
 	)
 
 	//获取缓存key
-	keys := app.GetCacheKeys("article", []int{
-		a.TagID,
-		a.State,
-		a.PageNum,
-		a.PageSize,
-	})
-
+	keys := a.GetCacheKeys()
 	//如果缓存存在，直接返回缓存
 	if cache.Exists(keys) {
 		data, err := cache.Get(keys)
@@ -131,7 +125,7 @@ func (a *Article) Delete() error {
 }
 
 //判断文章是否存在
-func (a *Article) ExistByID() (bool, error) {
+func (a *Article) ExistByID() bool {
 	return models.ExistArticleByID(a.ID)
 }
 
@@ -145,4 +139,21 @@ func (a *Article) GetMaps() map[string]interface{} {
 		maps["tag_id"] = a.TagID
 	}
 	return maps
+}
+
+//获取缓存key
+func (a *Article) GetCacheKeys() string {
+	keys := []string{"article", "list"}
+
+	if a.State >= 0 {
+		keys = append(keys, strconv.Itoa(a.State))
+	}
+	if a.PageNum > 0 {
+		keys = append(keys, strconv.Itoa(a.PageNum))
+	}
+	if a.PageSize > 0 {
+		keys = append(keys, strconv.Itoa(a.PageSize))
+	}
+
+	return strings.Join(keys, "_")
 }

@@ -29,23 +29,17 @@ func GetArticle(c *gin.Context) {
 
 	//数据验证错误
 	if valid.HasErrors() {
-		for _, err := range valid.Errors {
-			logger.Error(err.Key, err.Message)
-		}
+		logger.Errors(valid.Errors)
 		app.Response(http.StatusBadRequest, errors.INVALID_PARAMS, nil, c)
 		return
 	}
 
 	//数据仓库
 	articleRepository := repository.Article{ID:id}
-	exist, err := articleRepository.ExistByID()
-	if err != nil {
-		app.Response(http.StatusInternalServerError, errors.ERROR_CHECK_EXIST_ARTICLE_FAIL, nil, c)
-		return
-	}
+	article := articleRepository.ExistByID()
 
 	//判断文章是否存在
-	if !exist {
+	if !article {
 		app.Response( http.StatusOK, errors.ERROR_NOT_EXIST_ARTICLE, nil, c)
 		return
 	}
@@ -69,19 +63,16 @@ func GetArticle(c *gin.Context) {
 // @Success 200 {object} gin.H "{"code":200, "data":{}, "msg":"ok"}"
 // @Router /api/v1/articles [get]
 func GetArticles(c *gin.Context) {
-	maps := make(map[string]interface{})
 	valid := validation.Validation{}
 
 	 state := com.StrTo(c.DefaultQuery("state", "-1")).MustInt()
 	 if state >= 0 {
 		valid.Range(state, 0, 1, "state").Message("状态只能为0或1")
-		maps["state"] = state
 	}
 
 	 tagId := com.StrTo(c.Query("tag_id")).MustInt()
 	 if tagId > 0 {
 		valid.Min(tagId, 1, "tag_id").Message("标签id错误")
-		maps["tag_id"] = tagId
 	}
 
 	//验证错误
@@ -157,6 +148,14 @@ func AddArticle(c *gin.Context) {
 		return
 	}
 
+	//判断标签是否存在
+	tagRepository := repository.Tag{ID:tagId}
+	exist := tagRepository.ExistById()
+	if !exist {
+		app.Response(http.StatusBadRequest, errors.ERROR_NOT_EXIST_TAG, nil, c)
+		return
+	}
+
 	//生成文章数据仓库
 	articleRepository := repository.Article{
 		TagID:     tagId,
@@ -166,12 +165,6 @@ func AddArticle(c *gin.Context) {
 		Thumb:     thumb,
 		State:     0,
 	}
-
-	//if !models.ExistTagById(tagId) {
-	//	app.Response(http.StatusBadRequest, errors.ERROR_NOT_EXIST_TAG, nil, c)
-	//	return
-	//}
-
 	if err := articleRepository.Add(); err != nil {
 		app.Response(http.StatusInternalServerError, errors.ERROR_ADD_ARTICLE_FAIL, nil, c)
 	}
@@ -219,10 +212,12 @@ func EditArticle(c *gin.Context) {
 	}
 
 	//判断标签是否存在
-	//if !models.ExistTagById(tagId) {
-	//	app.Response(http.StatusBadRequest, errors.INVALID_PARAMS, nil, c)
-	//	return
-	//}
+	tagRepository := repository.Tag{ID:tagId}
+	tag := tagRepository.ExistById()
+	if !tag {
+		app.Response(http.StatusBadRequest, errors.ERROR_NOT_EXIST_TAG, nil, c)
+		return
+	}
 
 	//生成文章数据仓库
 	articleRepository := repository.Article{
@@ -236,8 +231,8 @@ func EditArticle(c *gin.Context) {
 	}
 
 	//判断文章是否存在
-	result, err := articleRepository.ExistByID()
-	if !result || err != nil {
+	article := articleRepository.ExistByID()
+	if !article {
 		app.Response(http.StatusBadRequest, errors.INVALID_PARAMS, nil, c)
 		return
 	}
@@ -264,8 +259,8 @@ func DeleteArticle(c *gin.Context) {
 	articleRepository := repository.Article{ID:id}
 
 	//判断文章是否存在
-	result, err := articleRepository.ExistByID()
-	if err != nil || !result {
+	article := articleRepository.ExistByID()
+	if !article {
 		app.Response(http.StatusBadRequest, errors.ERROR_NOT_EXIST_ARTICLE, nil, c)
 		return
 	}

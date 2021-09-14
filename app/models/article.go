@@ -14,17 +14,14 @@ type Article struct {
 }
 
 //判断文章是否存在
-func ExistArticleByID(id int) (bool, error) {
+func ExistArticleByID(id int) bool {
 	var article Article
-	err := db.Select("id").Where("id = ?", id).First(&article).Error
+	db.Select("id").Where("id = ?", id).First(&article)
 
-	if err != nil {
-		return false, err
-	}
 	if article.ID > 0 {
-		return true, nil
+		return true
 	}
-	return false, nil
+	return false
 }
 
 //获取文章总数
@@ -69,44 +66,44 @@ func GetArticle(id int) (*Article, error) {
 
 //编辑文章
 func EditArticle(id int, data interface{}) error {
-	result := db.Model(&Article{}).Where("id = ?", id).Updates(data)
+	err := db.Model(&Article{}).Where("id = ?", id).Updates(data).Error
 
-	if result.Error != nil {
-		return result.Error
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
 //添加文章
 func AddArticle(data map[string]interface{}) error {
-	result := db.Create(&Article{
+	err := db.Create(&Article{
 		TagID:   data["tag_id"].(int),
 		Title:   data["title"].(string),
 		Desc:    data["desc"].(string),
 		Content: data["content"].(string),
 		State:   1,
-	})
+	}).Error
 
-	if result.Error != nil {
-		return result.Error
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
 //删除文章
 func DeleteArticle(id int) error {
-	result := db.Where("id = ?", id).Delete(&Article{})
+	err := db.Where("id = ?", id).Delete(&Article{}).Error
 
-	if result.Error != nil {
-		return result.Error
+	if err != nil {
+		return err
 	}
 	return nil
 }
 
 func CleanArticle() (bool, error) {
-	result := db.Unscoped().Where("state = ?", -1).Delete(&Article{})
-	if result.Error != nil {
-		return false, result.Error
+	err := db.Unscoped().Where("state = ?", -1).Delete(&Article{}).Error
+	if err != nil {
+		return false, err
 	}
 	return true, nil
 }

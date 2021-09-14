@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/unknwon/com"
 	"github.com/utf6/goApi/app"
-	"github.com/utf6/goApi/app/models"
+	"github.com/utf6/goApi/app/repository"
 	"github.com/utf6/goApi/pkg/config"
 	errors "github.com/utf6/goApi/pkg/error"
 	"github.com/utf6/goApi/pkg/logger"
@@ -21,24 +21,38 @@ import (
 // @Success 200 {object} gin.H "{"code":200, "data":{}, "msg":"ok"}"
 // @Router /api/v1/tags [get]
 func GetTags(c *gin.Context) {
-	//state := c.DefaultQuery("state", "1")
-	maps := make(map[string]interface{})
-	data := make(map[string]interface{})
-
 	name := c.Query("name")
-	if name != "" {
-		maps["name"] = name
-	}
-
 	state := 1
 	if arg := c.Query("state"); arg != "" {
 		state = com.StrTo(arg).MustInt()
-		maps["state"] = state
 	}
 
-	//获取数据
-	data["list"] = models.GetTags(util.GetPage(c), config.Apps.PageSize, maps)
-	data["total"] = models.GetTagTotal(maps)
+	//生成数据仓库
+	tagRepository := repository.Tag{
+		Name:      name,
+		State:     state,
+		PageNum:   util.GetPage(c),
+		PageSize:  config.Apps.PageSize,
+	}
+
+	//获取所有
+	list, err := tagRepository.GetAll()
+	if err != nil {
+		app.Response(http.StatusInternalServerError, errors.ERROR_GET_TAG_FAIL, nil, c)
+		return
+	}
+
+	//获取总数
+	count, err := tagRepository.Count()
+	if err != nil {
+		app.Response(http.StatusInternalServerError, errors.ERROR_COUNT_TAG_FAIL, nil, c)
+		return
+	}
+
+	//组合数据
+	data := make(map[string]interface{})
+	data["list"] = list
+	data["total"] = count
 	app.Response(http.StatusOK, errors.SUCCESS, data, c)
 }
 
@@ -62,20 +76,28 @@ func AddTag(c *gin.Context) {
 		return
 	}
 
+	//生成数据仓库
+	tagRepository := repository.Tag{
+		Name:      name,
+		State:     1,
+	}
+
 	//判断标签是否存在
-	if !models.ExistTagByName(name) {
-		app.Response(http.StatusBadRequest, errors.ERROR_EXIST_TAG, nil, c)
+	exits := tagRepository.ExistByName()
+	if exits {
+		app.Response(http.StatusInternalServerError, errors. ERROR_EXIST_TAG, nil, c)
 		return
 	}
 
 	//判断是否添加成功
-	if models.AddTag(name) {
-		//返回结果
-		app.Response(http.StatusOK, errors.SUCCESS, nil, c)
+	err := tagRepository.Add()
+	if err != nil {
+		app.Response(http.StatusInternalServerError, errors.ERROR_ADD_TAG_FAIL, nil, c)
 		return
 	}
 
-	app.Response(http.StatusInternalServerError, errors.ERROR, nil, c)
+	//返回结果
+	app.Response(http.StatusOK, errors.SUCCESS, nil, c)
 }
 
 // @Tags 标签管理
@@ -102,20 +124,23 @@ func EditTag(c *gin.Context) {
 	}
 
 	//判断标签是否存在
-	if !models.ExistTagById(id) {
+	tagRepository := repository.Tag{
+		ID:id,
+		Name:name,
+	}
+	tag := tagRepository.ExistById()
+	if !tag {
 		app.Response(http.StatusBadRequest, errors.ERROR_NOT_EXIST_TAG, nil, c)
 		return
 	}
 
 	//组合数据
-	data := make(map[string]interface{})
-	data["name"] = name
-	if models.EditTag(id, data) {
-		app.Response(http.StatusOK, errors.SUCCESS, nil, c)
+	err := tagRepository.Edit()
+	if err != nil {
+		app.Response(http.StatusInternalServerError, errors.ERROR_EDIT_TAG_FAIL, nil, c)
 		return
 	}
-
-	app.Response(http.StatusInternalServerError, errors.ERROR, nil, c)
+	app.Response(http.StatusOK, errors.SUCCESS, nil, c)
 }
 
 // @Tags 标签管理
@@ -137,15 +162,17 @@ func DeleteTag(c *gin.Context) {
 	}
 
 	//判断标签是否存在
-	if !models.ExistTagById(id) {
+	tagRepository := repository.Tag{ID:id}
+	tag := tagRepository.ExistById()
+	if !tag {
 		app.Response(http.StatusBadRequest, errors.ERROR_NOT_EXIST_TAG, nil, c)
 		return
 	}
 
-	if models.DeleteTag(id) {
-		app.Response(http.StatusOK, errors.SUCCESS, nil, c)
+	err := tagRepository.Delete()
+	if err != nil {
+		app.Response(http.StatusInternalServerError, errors.ERROR_DELETE_TAG_FAIL, nil, c)
 		return
 	}
-
-	app.Response(http.StatusInternalServerError, errors.ERROR, nil, c)
+	app.Response(http.StatusOK, errors.SUCCESS, nil, c)
 }
