@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	"github.com/utf6/goApi/app"
 	"github.com/utf6/goApi/app/http/controllers/api"
 	v1 "github.com/utf6/goApi/app/http/controllers/api/v1"
 	"github.com/utf6/goApi/app/http/middleware"
@@ -23,6 +24,7 @@ func InitRoute() *gin.Engine {
 	r.POST("/auth/getToken", api.GetToken)
 	r.POST("/auth/uploads", api.Uploads)
 	r.StaticFS("/uploads/images", http.Dir(config.Apps.RootPath + files.GetImagePath()))
+	r.StaticFS("/export", http.Dir(app.GetExcelFullPath()))
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
@@ -33,6 +35,8 @@ func InitRoute() *gin.Engine {
 		apiV1.GET("/tags", v1.GetTags)
 		//新建标签
 		apiV1.POST("/tags", v1.AddTag)
+		//导出标签
+		apiV1.POST("/tags/export", v1.ExportTag)
 		//更新指定标签
 		apiV1.PUT("/tags/:id", v1.EditTag)
 		//删除指定标签

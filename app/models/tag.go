@@ -8,9 +8,16 @@ type Tag struct {
 }
 
 //获取标签
-func GetTags(pageNum int, pageSize int, maps interface{}) ([] *Tag, error) {
-	var tags [] *Tag
-	err := db.Where(maps).Offset(pageNum).Limit(pageSize).Order("id DESC").Find(&tags).Error
+func GetTags(pageNum int, pageSize int, maps interface{}) ([]*Tag, error) {
+	var tags []*Tag
+	var err error
+
+	if pageNum > 0 && pageSize > 0 {
+		err = db.Where(maps).Offset(pageNum).Limit(pageSize).Order("id DESC").Find(&tags).Error
+	} else {
+		err = db.Where(maps).Order("id DESC").Find(&tags).Error
+	}
+
 	if err != nil {
 		return nil, err
 	}

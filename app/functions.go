@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"github.com/gin-gonic/gin"
+	"github.com/utf6/goApi/pkg/config"
 	errors "github.com/utf6/goApi/pkg/error"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -41,4 +42,13 @@ func Response(httpCode, code int, data interface{}, C *gin.Context) {
 		"msg" : errors.GetMsg(code),
 		"data": data,
 	})
+}
+
+//获取excle 表格路由
+func GetExcelFullURL(name string) string {
+	return config.Apps.ImageUrl + "/" + config.Apps.ExportPath + name
+}
+
+func GetExcelFullPath() string {
+	return config.Apps.RootPath + config.Apps.ExportPath
 }

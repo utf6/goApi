@@ -10,6 +10,7 @@ type App struct {
 	JwtSecret   string
 	PageSize    int
 	RuntimePath string
+	ExportPath string
 	RootPath string
 
 	ImageUrl      string

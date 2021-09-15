@@ -176,3 +176,35 @@ func DeleteTag(c *gin.Context) {
 	}
 	app.Response(http.StatusOK, errors.SUCCESS, nil, c)
 }
+
+// @Tags 导出标签
+// @Summary 导出文章标签
+// @Param id formData string false "name"
+// @Param state formData int false "state"
+// @Param token path string true "token"
+// @Success 200 {object} gin.H "{"code":200,"data":{},"msg":"ok"}"
+// @Router /api/v1/tags/{id} [Delete]
+func ExportTag(c *gin.Context)  {
+	name := c.PostForm("name")
+	state := 1
+	if arg := c.PostForm("state"); arg != "" {
+		state = com.StrTo(arg).MustInt()
+	}
+
+	//生成数据仓库
+	tagRepository := repository.Tag{
+		Name:      name,
+		State:     state,
+	}
+
+	filename, err := tagRepository.Export()
+	if err != nil {
+		app.Response(http.StatusOK, errors.ERROR_EXPORT_TAG_FAIL, nil, c)
+		return
+	}
+
+	app.Response(http.StatusOK, errors.SUCCESS, map[string]string{
+		"export_path" : config.Apps.ExportPath + filename,
+		"export_url" : app.GetExcelFullURL(filename),
+	}, c)
+}
