@@ -37,6 +37,8 @@ func InitRoute() *gin.Engine {
 		apiV1.POST("/tags", v1.AddTag)
 		//导出标签
 		apiV1.POST("/tags/export", v1.ExportTag)
+		//导入标签
+		apiV1.POST("/tags/import", v1.ImportTag)
 		//更新指定标签
 		apiV1.PUT("/tags/:id", v1.EditTag)
 		//删除指定标签

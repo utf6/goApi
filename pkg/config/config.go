@@ -16,6 +16,7 @@ type App struct {
 	ImageUrl      string
 	ImageSavePath string
 	ImageMaxSize  int
+	UploadSize int64
 	ImageAllows   []string
 
 	LogPath    string

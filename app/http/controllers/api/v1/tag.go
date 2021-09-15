@@ -11,6 +11,7 @@ import (
 	"github.com/utf6/goApi/pkg/logger"
 	"github.com/utf6/goApi/pkg/util"
 	"net/http"
+	"path"
 )
 
 // @Tags 标签管理
@@ -183,7 +184,7 @@ func DeleteTag(c *gin.Context) {
 // @Param state formData int false "state"
 // @Param token path string true "token"
 // @Success 200 {object} gin.H "{"code":200,"data":{},"msg":"ok"}"
-// @Router /api/v1/tags/{id} [Delete]
+// @Router /api/v1/tags/export [Post]
 func ExportTag(c *gin.Context)  {
 	name := c.PostForm("name")
 	state := 1
@@ -207,4 +208,50 @@ func ExportTag(c *gin.Context)  {
 		"export_path" : config.Apps.ExportPath + filename,
 		"export_url" : app.GetExcelFullURL(filename),
 	}, c)
+}
+
+// @Tags 导入标签
+// @Summary 导入文章标签
+// @Param file formData string false "file"
+// @Param token path string true "token"
+// @Success 200 {object} gin.H "{"code":200,"data":{},"msg":"ok"}"
+// @Router /api/v1/tags/import [Post]
+func ImportTag(c *gin.Context)  {
+	_, info, err := c.Request.FormFile("file")
+	if err != nil {
+		logger.Warn(err)
+		app.Response(http.StatusBadRequest, errors.INVALID_PARAMS, nil, c)
+		return
+	}
+
+	//判断文件大小
+	//if !(info.Size >= config.Apps.UploadSize) {
+	//	app.Response(http.StatusBadRequest, errors.ERROR_UPLOAD_MAX_SIZE_FAIL, nil, c)
+	//	return
+	//}
+	logger.Info(info.Size)
+
+	//判断后缀名
+	ext := path.Ext(info.Filename)
+	if ext != ".xls" && ext != ".xlsx" {
+		app.Response(http.StatusBadRequest, errors.ERROR_UPLOAD_EXT_FAIL, nil, c)
+		return
+	}
+
+	err = c.SaveUploadedFile(info, "public/" + info.Filename)
+	if  err != nil {
+		logger.Warn(err)
+		app.Response(http.StatusBadRequest, errors.ERROR_UPLOAD_SAVE_FAIL, nil, c)
+		return
+	}
+
+	tagRepository := repository.Tag{}
+	err = tagRepository.Import("public/" + info.Filename)
+	if err != nil {
+		logger.Warn(err)
+		app.Response(http.StatusInternalServerError, errors.ERROR_IMPORT_TAG_FAIL, nil, c)
+		return
+	}
+
+	app.Response(http.StatusOK, errors.SUCCESS, nil, c)
 }

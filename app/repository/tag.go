@@ -8,6 +8,7 @@ import (
 	"github.com/utf6/goApi/pkg/cache"
 	"github.com/utf6/goApi/pkg/logger"
 	"github.com/xuri/excelize/v2"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -125,12 +126,12 @@ func (t *Tag) Export() (string, error) {
 	}
 
 	file := excelize.NewFile()
-	index := file.NewSheet("sheet")
+	index := file.NewSheet("sheet1")
 
 	//写入表头
 	titles := map[string]string{"A1" : "ID", "B1" : "名称", "C1" : "创建时间", "D1" : "更新时间", "E1" : "状态"}
 	for k, title := range titles {
-		file.SetCellValue("sheet", k, title)
+		file.SetCellValue("sheet1", k, title)
 	}
 
 	for id, tag := range tags {
@@ -152,7 +153,7 @@ func (t *Tag) Export() (string, error) {
 
 		//写入表格
 		for ck, value := range values {
-			file.SetCellValue("sheet", ck, value)
+			file.SetCellValue("sheet1", ck, value)
 		}
 	}
 
@@ -166,4 +167,26 @@ func (t *Tag) Export() (string, error) {
 		return "", err
 	}
 	return saveName, nil
+}
+
+//导入标签
+func (t *Tag) Import(filename string) error {
+
+	var file, err = excelize.OpenFile(filename)
+	logger.Debug(file)
+	if err != nil {
+		return err
+	}
+
+	rows, err := file.GetRows("Sheet1")
+	for _, row := range rows {
+		if len(row) > 0 {
+			for _, cell := range row {
+				//data = append(data, cell)
+				_ = models.AddTag(cell)
+			}
+		}
+	}
+	_ = os.Remove(filename)
+	return nil
 }
