@@ -36,7 +36,7 @@ func InitRoute() *gin.Engine {
 		//新建标签
 		apiV1.POST("/tags", v1.AddTag)
 		//导出标签
-		apiV1.POST("/tags/export", v1.ExportTag)
+		apiV1.GET("/tags/export", v1.ExportTag)
 		//导入标签
 		apiV1.POST("/tags/import", v1.ImportTag)
 		//更新指定标签
@@ -50,6 +50,10 @@ func InitRoute() *gin.Engine {
 		apiV1.GET("/articles/:id", v1.GetArticle)
 		//新建文章
 		apiV1.POST("/articles", v1.AddArticle)
+		//导入文章
+		apiV1.POST("/articles/import", v1.ImportArticle)
+		//文章
+		apiV1.GET("/articles/export", v1.ExportArticle)
 		//更新指定文章
 		apiV1.PUT("/articles/:id", v1.EditArticle)
 		//删除指定文章

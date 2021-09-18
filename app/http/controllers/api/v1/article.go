@@ -11,6 +11,7 @@ import (
 	"github.com/utf6/goApi/pkg/logger"
 	"github.com/utf6/goApi/pkg/util"
 	"net/http"
+	"path"
 )
 
 // @Tags 文章管理
@@ -273,4 +274,83 @@ func DeleteArticle(c *gin.Context) {
 	}
 
 	app.Response(http.StatusOK, errors.SUCCESS, nil, c)
+}
+
+// @Tags 导入文章
+// @Summary 通过 Excel 导入文章
+// @Param token path string true "access_token"
+// @Success 200 {object} gin.H "{"code":200, "data":{}, "msg":"ok"}"
+// @Router /api/v1/articles/import [Post]
+func ImportArticle(c *gin.Context) {
+	_, info, err := c.Request.FormFile("file")
+	if err != nil {
+		logger.Warn(err)
+		app.Response(http.StatusBadRequest, errors.INVALID_PARAMS, nil, c)
+		return
+	}
+
+	//判断文件大小
+	//if !(info.Size >= config.Apps.UploadSize) {
+	//	app.Response(http.StatusBadRequest, errors.ERROR_UPLOAD_MAX_SIZE_FAIL, nil, c)
+	//	return
+	//}
+
+	//判断后缀名
+	ext := path.Ext(info.Filename)
+	if ext != ".xls" && ext != ".xlsx" {
+		app.Response(http.StatusBadRequest, errors.ERROR_UPLOAD_EXT_FAIL, nil, c)
+		return
+	}
+
+	err = c.SaveUploadedFile(info, "public/" + info.Filename)
+	if  err != nil {
+		logger.Warn(err)
+		app.Response(http.StatusBadRequest, errors.ERROR_UPLOAD_SAVE_FAIL, nil, c)
+		return
+	}
+
+	articleRepository := repository.Article{}
+	err = articleRepository.Import("public/" + info.Filename)
+	if err != nil {
+		app.Response(http.StatusInternalServerError, errors.ERROR_IMPORT_ARTICLE_FAIL, nil, c)
+	}
+	app.Response(http.StatusOK, errors.SUCCESS, nil, c)
+}
+
+//导出文章
+func ExportArticle(c *gin.Context)  {
+	valid := validation.Validation{}
+
+	state := com.StrTo(c.DefaultQuery("state", "1")).MustInt()
+	if state >= 0 {
+		valid.Range(state, 0, 1, "state").Message("状态只能为0或1")
+	}
+
+	tagId := com.StrTo(c.Query("tag_id")).MustInt()
+	if tagId > 0 {
+		valid.Min(tagId, 1, "tag_id").Message("标签id错误")
+	}
+
+	if valid.HasErrors() {
+		logger.Errors(valid.Errors)
+		app.Response(http.StatusBadRequest, errors.INVALID_PARAMS, nil, c)
+		return
+	}
+
+	articleRepository := repository.Article{
+		TagID:     tagId,
+		State:     state,
+	}
+
+	filename, err := articleRepository.Export()
+	if err != nil {
+		app.Response(http.StatusOK, errors.ERROR_EXPORT_TAG_FAIL, nil, c)
+		return
+	}
+
+	app.Response(http.StatusOK, errors.SUCCESS, map[string]string{
+		"export_path" : config.Apps.ExportPath + filename,
+		"export_url" : app.GetExcelFullURL(filename),
+	}, c)
+
 }

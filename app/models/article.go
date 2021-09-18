@@ -38,8 +38,14 @@ func GetArticleTotal(maps interface{}) (int, error) {
 //获取所有文章
 func GetArticles(pageNum int, pageSize int, maps interface{}) ([] *Article, error) {
 	var articles [] *Article
+	var err error
 
-	err := db.Preload("Tag").Where(maps).Offset(pageNum).Limit(pageSize).Order("id desc").Find(&articles).Error
+	if pageNum > 0 && pageSize > 0 {
+		err = db.Preload("Tag").Where(maps).Offset(pageNum).Limit(pageSize).Order("id desc").Find(&articles).Error
+	} else {
+		err = db.Preload("Tag").Where(maps).Order("id desc").Find(&articles).Error
+	}
+
 	if err != nil {
 		return  nil, err
 	}

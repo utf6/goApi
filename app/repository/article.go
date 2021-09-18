@@ -2,11 +2,15 @@ package repository
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/utf6/goApi/app"
 	"github.com/utf6/goApi/app/models"
 	"github.com/utf6/goApi/pkg/cache"
 	"github.com/utf6/goApi/pkg/logger"
+	"github.com/xuri/excelize/v2"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Article struct {
@@ -156,4 +160,85 @@ func (a *Article) GetCacheKeys() string {
 	}
 
 	return strings.Join(keys, "_")
+}
+
+//导入文章
+func (a *Article) Import(filename string) error {
+
+	var file, err = excelize.OpenFile(filename)
+	if err != nil {
+		return  err
+	}
+
+	var rows, _ = file.GetRows("Sheet1")
+	for key, row := range rows {
+		if key > 0 {
+			//组合数据
+			TagID, _ := strconv.Atoi(row[3])
+			var article = map[string]interface{}{
+				"tag_id":  TagID,
+				"title":   row[0],
+				"desc":    row[1],
+				"content": row[2],
+				"state":   1,
+			}
+			_ = models.AddArticle(article)
+		}
+	}
+	return  nil
+}
+
+//导出文章
+func (a *Article) Export() (string, error) {
+	articles, err := a.GetAll()
+	if err != nil {
+		return "", err
+	}
+
+	file := excelize.NewFile()
+	index := file.NewSheet("Sheet1")
+
+	//写入表头
+	titles := map[string]string{"A1" : "ID", "B1" : "标题", "C1" : "描述", "D1" : "内容", "E1" : "状态", "F1" : "标签id", "G1" : "缩略图", "H1" : "创建时间", "I1" : "更新时间"}
+	for k, title := range titles {
+		file.SetCellValue("Sheet1", k, title)
+	}
+
+	for id, article := range articles {
+		//组合数据
+		staStr := "正常"
+		if article.State == 0 {
+			staStr = "禁用"
+		} else if article.State == -1 {
+			staStr = "删除"
+		}
+
+		var (
+			values = map[string]string{
+				fmt.Sprintf("A%d", id+2): strconv.Itoa(article.ID),
+				fmt.Sprintf("B%d", id+2): article.Title,
+				fmt.Sprintf("C%d", id+2): article.Desc,
+				fmt.Sprintf("D%d", id+2): article.Content,
+				fmt.Sprintf("E%d", id+2): staStr,//strconv.Itoa(tag.State),
+				fmt.Sprintf("F%d", id+2): strconv.Itoa(article.TagID),
+				fmt.Sprintf("G%d", id+2): article.Thumb,
+				fmt.Sprintf("H%d", id+2): article.CreatedAt.Format("2006-01-02 15:04:05"),
+				fmt.Sprintf("I%d", id+2): article.UpdatedAt.Format("2006-01-02 15:04:05"),
+			} //写入表格
+		)
+		for ck, value := range values {
+			file.SetCellValue("Sheet1", ck, value)
+		}
+	}
+
+	file.SetActiveSheet(index)
+
+	saveName := "articles_" + strconv.Itoa(int(time.Now().Unix())) + ".xlsx"
+	savePath := app.GetExcelFullPath() + saveName  //app.GetExcelFullPath()
+
+	// Save spreadsheet by the given path.
+	if err := file.SaveAs(savePath); err != nil {
+		return "", err
+	}
+	return saveName, nil
 }

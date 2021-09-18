@@ -186,9 +186,9 @@ func DeleteTag(c *gin.Context) {
 // @Success 200 {object} gin.H "{"code":200,"data":{},"msg":"ok"}"
 // @Router /api/v1/tags/export [Post]
 func ExportTag(c *gin.Context)  {
-	name := c.PostForm("name")
+	name := c.Query("name")
 	state := 1
-	if arg := c.PostForm("state"); arg != "" {
+	if arg := c.Query("state"); arg != "" {
 		state = com.StrTo(arg).MustInt()
 	}
 

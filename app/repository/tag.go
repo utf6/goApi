@@ -126,12 +126,12 @@ func (t *Tag) Export() (string, error) {
 	}
 
 	file := excelize.NewFile()
-	index := file.NewSheet("sheet1")
+	index := file.NewSheet("Sheet1")
 
 	//写入表头
 	titles := map[string]string{"A1" : "ID", "B1" : "名称", "C1" : "创建时间", "D1" : "更新时间", "E1" : "状态"}
 	for k, title := range titles {
-		file.SetCellValue("sheet1", k, title)
+		file.SetCellValue("Sheet1", k, title)
 	}
 
 	for id, tag := range tags {
@@ -144,16 +144,16 @@ func (t *Tag) Export() (string, error) {
 		}
 
 		values := map[string]string{
-			fmt.Sprintf("A%d", id+1) : strconv.Itoa(tag.ID),
-			fmt.Sprintf("B%d", id+1) : tag.Name,
-			fmt.Sprintf("C%d", id+1) : tag.CreatedAt.Format("2006-01-02 15:04:05"),
-			fmt.Sprintf("D%d", id+1) : tag.UpdatedAt.Format("2006-01-02 15:04:05"),
-			fmt.Sprintf("E%d", id+1) :  staStr, //strconv.Itoa(tag.State),
+			fmt.Sprintf("A%d", id+2) : strconv.Itoa(tag.ID),
+			fmt.Sprintf("B%d", id+2) : tag.Name,
+			fmt.Sprintf("C%d", id+2) : tag.CreatedAt.Format("2006-01-02 15:04:05"),
+			fmt.Sprintf("D%d", id+2) : tag.UpdatedAt.Format("2006-01-02 15:04:05"),
+			fmt.Sprintf("E%d", id+2) :  staStr, //strconv.Itoa(tag.State),
 		}
 
 		//写入表格
 		for ck, value := range values {
-			file.SetCellValue("sheet1", ck, value)
+			file.SetCellValue("Sheet1", ck, value)
 		}
 	}
 
